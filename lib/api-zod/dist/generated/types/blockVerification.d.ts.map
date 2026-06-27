@@ -1,0 +1,1 @@
+{"version":3,"file":"blockVerification.d.ts","sourceRoot":"","sources":["../../../src/generated/types/blockVerification.ts"],"names":[],"mappings":"AAAA;;;;;;GAMG;AAEH,MAAM,WAAW,iBAAiB;IAChC,KAAK,EAAE,MAAM,CAAC;IACd,UAAU,EAAE,MAAM,CAAC;IACnB,cAAc,EAAE,MAAM,CAAC;IACvB,SAAS,EAAE,OAAO,CAAC;IACnB,iBAAiB,EAAE,OAAO,CAAC;IAC3B,IAAI,CAAC,EAAE,MAAM,CAAC;CACf"}

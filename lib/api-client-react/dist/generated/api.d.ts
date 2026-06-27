@@ -1,0 +1,252 @@
+import type { QueryKey, UseMutationOptions, UseMutationResult, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import type { ActivityEntry, BlockResult, ChainData, DashboardStats, ErrorResponse, HealthStatus, PropertyInput, PropertyRecord, SeedResult, TransferInput, UlpinCheckResult, VerificationResult } from './api.schemas';
+import { customFetch } from '../custom-fetch';
+import type { ErrorType, BodyType } from '../custom-fetch';
+type AwaitedInput<T> = PromiseLike<T> | T;
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+export declare const getHealthCheckUrl: () => string;
+/**
+ * Returns server health status
+ * @summary Health check
+ */
+export declare const healthCheck: (options?: RequestInit) => Promise<HealthStatus>;
+export declare const getHealthCheckQueryKey: () => readonly ["/api/healthz"];
+export declare const getHealthCheckQueryOptions: <TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type HealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof healthCheck>>>;
+export type HealthCheckQueryError = ErrorType<unknown>;
+/**
+ * @summary Health check
+ */
+export declare function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export declare const getGetStatsUrl: () => string;
+/**
+ * Returns total blocks, registrations, transfers, chain validity, and recent activity
+ * @summary Get dashboard statistics
+ */
+export declare const getStats: (options?: RequestInit) => Promise<DashboardStats>;
+export declare const getGetStatsQueryKey: () => readonly ["/api/stats"];
+export declare const getGetStatsQueryOptions: <TData = Awaited<ReturnType<typeof getStats>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getStats>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof getStats>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type GetStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getStats>>>;
+export type GetStatsQueryError = ErrorType<unknown>;
+/**
+ * @summary Get dashboard statistics
+ */
+export declare function useGetStats<TData = Awaited<ReturnType<typeof getStats>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getStats>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export declare const getRegisterPropertyUrl: () => string;
+/**
+ * Creates a new block in the chain for a land registration
+ * @summary Register a new land parcel
+ */
+export declare const registerProperty: (propertyInput: PropertyInput, options?: RequestInit) => Promise<BlockResult>;
+export declare const getRegisterPropertyMutationOptions: <TError = ErrorType<ErrorResponse>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof registerProperty>>, TError, {
+        data: BodyType<PropertyInput>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationOptions<Awaited<ReturnType<typeof registerProperty>>, TError, {
+    data: BodyType<PropertyInput>;
+}, TContext>;
+export type RegisterPropertyMutationResult = NonNullable<Awaited<ReturnType<typeof registerProperty>>>;
+export type RegisterPropertyMutationBody = BodyType<PropertyInput>;
+export type RegisterPropertyMutationError = ErrorType<ErrorResponse>;
+/**
+* @summary Register a new land parcel
+*/
+export declare const useRegisterProperty: <TError = ErrorType<ErrorResponse>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof registerProperty>>, TError, {
+        data: BodyType<PropertyInput>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationResult<Awaited<ReturnType<typeof registerProperty>>, TError, {
+    data: BodyType<PropertyInput>;
+}, TContext>;
+export declare const getGetPropertyUrl: (ulpin: string) => string;
+/**
+ * Returns current owner, ownership history, and fraud alerts for a property
+ * @summary Search property by ULPIN
+ */
+export declare const getProperty: (ulpin: string, options?: RequestInit) => Promise<PropertyRecord>;
+export declare const getGetPropertyQueryKey: (ulpin: string) => readonly [`/api/properties/${string}`];
+export declare const getGetPropertyQueryOptions: <TData = Awaited<ReturnType<typeof getProperty>>, TError = ErrorType<ErrorResponse>>(ulpin: string, options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getProperty>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof getProperty>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type GetPropertyQueryResult = NonNullable<Awaited<ReturnType<typeof getProperty>>>;
+export type GetPropertyQueryError = ErrorType<ErrorResponse>;
+/**
+ * @summary Search property by ULPIN
+ */
+export declare function useGetProperty<TData = Awaited<ReturnType<typeof getProperty>>, TError = ErrorType<ErrorResponse>>(ulpin: string, options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getProperty>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export declare const getCheckUlpinUrl: (ulpin: string) => string;
+/**
+ * Real-time availability check for a ULPIN before registration
+ * @summary Check if ULPIN is already registered
+ */
+export declare const checkUlpin: (ulpin: string, options?: RequestInit) => Promise<UlpinCheckResult>;
+export declare const getCheckUlpinQueryKey: (ulpin: string) => readonly [`/api/properties/${string}/check`];
+export declare const getCheckUlpinQueryOptions: <TData = Awaited<ReturnType<typeof checkUlpin>>, TError = ErrorType<unknown>>(ulpin: string, options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof checkUlpin>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof checkUlpin>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type CheckUlpinQueryResult = NonNullable<Awaited<ReturnType<typeof checkUlpin>>>;
+export type CheckUlpinQueryError = ErrorType<unknown>;
+/**
+ * @summary Check if ULPIN is already registered
+ */
+export declare function useCheckUlpin<TData = Awaited<ReturnType<typeof checkUlpin>>, TError = ErrorType<unknown>>(ulpin: string, options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof checkUlpin>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export declare const getTransferPropertyUrl: () => string;
+/**
+ * Transfers a property to a new owner, creating an immutable audit trail
+ * @summary Transfer land ownership
+ */
+export declare const transferProperty: (transferInput: TransferInput, options?: RequestInit) => Promise<BlockResult>;
+export declare const getTransferPropertyMutationOptions: <TError = ErrorType<ErrorResponse>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof transferProperty>>, TError, {
+        data: BodyType<TransferInput>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationOptions<Awaited<ReturnType<typeof transferProperty>>, TError, {
+    data: BodyType<TransferInput>;
+}, TContext>;
+export type TransferPropertyMutationResult = NonNullable<Awaited<ReturnType<typeof transferProperty>>>;
+export type TransferPropertyMutationBody = BodyType<TransferInput>;
+export type TransferPropertyMutationError = ErrorType<ErrorResponse>;
+/**
+* @summary Transfer land ownership
+*/
+export declare const useTransferProperty: <TError = ErrorType<ErrorResponse>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof transferProperty>>, TError, {
+        data: BodyType<TransferInput>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationResult<Awaited<ReturnType<typeof transferProperty>>, TError, {
+    data: BodyType<TransferInput>;
+}, TContext>;
+export declare const getGetChainUrl: () => string;
+/**
+ * Returns all blocks in the chain for the explorer view
+ * @summary Get full blockchain
+ */
+export declare const getChain: (options?: RequestInit) => Promise<ChainData>;
+export declare const getGetChainQueryKey: () => readonly ["/api/chain"];
+export declare const getGetChainQueryOptions: <TData = Awaited<ReturnType<typeof getChain>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getChain>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof getChain>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type GetChainQueryResult = NonNullable<Awaited<ReturnType<typeof getChain>>>;
+export type GetChainQueryError = ErrorType<unknown>;
+/**
+ * @summary Get full blockchain
+ */
+export declare function useGetChain<TData = Awaited<ReturnType<typeof getChain>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getChain>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export declare const getVerifyChainUrl: () => string;
+/**
+ * Validates every block hash and chain linkage, returns per-block results
+ * @summary Verify blockchain integrity
+ */
+export declare const verifyChain: (options?: RequestInit) => Promise<VerificationResult>;
+export declare const getVerifyChainQueryKey: () => readonly ["/api/chain/verify"];
+export declare const getVerifyChainQueryOptions: <TData = Awaited<ReturnType<typeof verifyChain>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof verifyChain>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof verifyChain>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type VerifyChainQueryResult = NonNullable<Awaited<ReturnType<typeof verifyChain>>>;
+export type VerifyChainQueryError = ErrorType<unknown>;
+/**
+ * @summary Verify blockchain integrity
+ */
+export declare function useVerifyChain<TData = Awaited<ReturnType<typeof verifyChain>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof verifyChain>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export declare const getSeedDataUrl: () => string;
+/**
+ * Populates the blockchain with realistic demo land records. Only runs if chain has fewer than 5 non-genesis blocks.
+ * @summary Seed demo data
+ */
+export declare const seedData: (options?: RequestInit) => Promise<SeedResult>;
+export declare const getSeedDataMutationOptions: <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof seedData>>, TError, void, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationOptions<Awaited<ReturnType<typeof seedData>>, TError, void, TContext>;
+export type SeedDataMutationResult = NonNullable<Awaited<ReturnType<typeof seedData>>>;
+export type SeedDataMutationError = ErrorType<unknown>;
+/**
+* @summary Seed demo data
+*/
+export declare const useSeedData: <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof seedData>>, TError, void, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationResult<Awaited<ReturnType<typeof seedData>>, TError, void, TContext>;
+export declare const getGetActivityUrl: () => string;
+/**
+ * Returns the 20 most recent transactions for the activity feed
+ * @summary Get recent blockchain activity
+ */
+export declare const getActivity: (options?: RequestInit) => Promise<ActivityEntry[]>;
+export declare const getGetActivityQueryKey: () => readonly ["/api/activity"];
+export declare const getGetActivityQueryOptions: <TData = Awaited<ReturnType<typeof getActivity>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getActivity>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof getActivity>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type GetActivityQueryResult = NonNullable<Awaited<ReturnType<typeof getActivity>>>;
+export type GetActivityQueryError = ErrorType<unknown>;
+/**
+ * @summary Get recent blockchain activity
+ */
+export declare function useGetActivity<TData = Awaited<ReturnType<typeof getActivity>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getActivity>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export {};
+//# sourceMappingURL=api.d.ts.map

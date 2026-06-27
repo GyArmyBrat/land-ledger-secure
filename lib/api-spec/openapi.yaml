@@ -1,0 +1,510 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: BhuChain - Blockchain Based Land Registry API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: stats
+    description: Dashboard statistics
+  - name: registration
+    description: Land registration operations
+  - name: transfer
+    description: Ownership transfer operations
+  - name: search
+    description: Property search operations
+  - name: explorer
+    description: Blockchain explorer operations
+  - name: verify
+    description: Chain verification operations
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /stats:
+    get:
+      operationId: getStats
+      tags: [stats]
+      summary: Get dashboard statistics
+      description: Returns total blocks, registrations, transfers, chain validity, and recent activity
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /properties:
+    post:
+      operationId: registerProperty
+      tags: [registration]
+      summary: Register a new land parcel
+      description: Creates a new block in the chain for a land registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PropertyInput"
+      responses:
+        "201":
+          description: Property registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockResult"
+        "409":
+          description: Duplicate UID - fraud detected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /properties/{ulpin}:
+    get:
+      operationId: getProperty
+      tags: [search]
+      summary: Search property by ULPIN
+      description: Returns current owner, ownership history, and fraud alerts for a property
+      parameters:
+        - name: ulpin
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique Land Parcel Identification Number
+      responses:
+        "200":
+          description: Property record found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PropertyRecord"
+        "404":
+          description: Property not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /properties/{ulpin}/check:
+    get:
+      operationId: checkUlpin
+      tags: [search]
+      summary: Check if ULPIN is already registered
+      description: Real-time availability check for a ULPIN before registration
+      parameters:
+        - name: ulpin
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ULPIN availability status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UlpinCheckResult"
+
+  /transfers:
+    post:
+      operationId: transferProperty
+      tags: [transfer]
+      summary: Transfer land ownership
+      description: Transfers a property to a new owner, creating an immutable audit trail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferInput"
+      responses:
+        "201":
+          description: Ownership transferred successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockResult"
+        "409":
+          description: Transfer denied - ownership mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /chain:
+    get:
+      operationId: getChain
+      tags: [explorer]
+      summary: Get full blockchain
+      description: Returns all blocks in the chain for the explorer view
+      responses:
+        "200":
+          description: Full blockchain
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChainData"
+
+  /chain/verify:
+    get:
+      operationId: verifyChain
+      tags: [verify]
+      summary: Verify blockchain integrity
+      description: Validates every block hash and chain linkage, returns per-block results
+      responses:
+        "200":
+          description: Verification results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResult"
+
+  /seed:
+    post:
+      operationId: seedData
+      tags: [stats]
+      summary: Seed demo data
+      description: Populates the blockchain with realistic demo land records. Only runs if chain has fewer than 5 non-genesis blocks.
+      responses:
+        "200":
+          description: Seed result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeedResult"
+
+  /activity:
+    get:
+      operationId: getActivity
+      tags: [stats]
+      summary: Get recent blockchain activity
+      description: Returns the 20 most recent transactions for the activity feed
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityEntry"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    PropertyInput:
+      type: object
+      required: [ownerName, ownerAge, ownerAddress, ulpin, area, landType, district, state]
+      properties:
+        ownerName:
+          type: string
+          minLength: 2
+        ownerAge:
+          type: integer
+          minimum: 18
+          maximum: 120
+        ownerAddress:
+          type: string
+          minLength: 5
+        ulpin:
+          type: string
+          description: Unique Land Parcel Identification Number (14 digits)
+          minLength: 14
+          maxLength: 14
+        area:
+          type: string
+          description: Area in square meters or acres
+        landType:
+          type: string
+          description: Agricultural, Residential, Commercial, Industrial, Forest
+        district:
+          type: string
+        state:
+          type: string
+        aadhaarLast4:
+          type: string
+          description: Last 4 digits of Aadhaar for KYC simulation
+        ipfsDocHash:
+          type: ["string", "null"]
+          description: Simulated IPFS CID for deed documents
+
+    TransferInput:
+      type: object
+      required: [ulpin, currentOwner, newOwnerName, newOwnerAge, newOwnerAddress]
+      properties:
+        ulpin:
+          type: string
+        currentOwner:
+          type: string
+        newOwnerName:
+          type: string
+          minLength: 2
+        newOwnerAge:
+          type: integer
+          minimum: 18
+        newOwnerAddress:
+          type: string
+          minLength: 5
+        aadhaarLast4:
+          type: string
+          description: New owner Aadhaar last 4 digits
+        transferReason:
+          type: string
+          description: Reason for transfer (Sale, Inheritance, Gift, Court Order)
+        ipfsDocHash:
+          type: ["string", "null"]
+          description: Simulated IPFS CID for transfer deed
+
+    Block:
+      type: object
+      required: [index, timestamp, data, previousHash, hash, nonce]
+      properties:
+        index:
+          type: integer
+        timestamp:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+        previousHash:
+          type: string
+        hash:
+          type: string
+        nonce:
+          type: integer
+
+    BlockResult:
+      type: object
+      required: [success, message, block]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        block:
+          $ref: "#/components/schemas/Block"
+
+    OwnershipHistoryEntry:
+      type: object
+      required: [blockIndex, timestamp, type, hash]
+      properties:
+        blockIndex:
+          type: integer
+        timestamp:
+          type: string
+        type:
+          type: string
+          enum: [registration, transfer]
+        hash:
+          type: string
+        owner:
+          type: ["string", "null"]
+        from:
+          type: ["string", "null"]
+        to:
+          type: ["string", "null"]
+        details:
+          type: string
+
+    FraudAlert:
+      type: object
+      required: [level, message]
+      properties:
+        level:
+          type: string
+          enum: [info, warning, critical]
+        message:
+          type: string
+
+    PropertyRecord:
+      type: object
+      required: [success, currentOwner, latestBlock, history, alerts]
+      properties:
+        success:
+          type: boolean
+        currentOwner:
+          type: ["string", "null"]
+        latestBlock:
+          $ref: "#/components/schemas/Block"
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/OwnershipHistoryEntry"
+        alerts:
+          type: array
+          items:
+            $ref: "#/components/schemas/FraudAlert"
+
+    UlpinCheckResult:
+      type: object
+      required: [exists]
+      properties:
+        exists:
+          type: boolean
+        ownerName:
+          type: ["string", "null"]
+
+    ChainData:
+      type: object
+      required: [length, chain]
+      properties:
+        length:
+          type: integer
+        chain:
+          type: array
+          items:
+            $ref: "#/components/schemas/Block"
+
+    BlockVerification:
+      type: object
+      required: [index, storedHash, calculatedHash, hashValid, previousHashValid]
+      properties:
+        index:
+          type: integer
+        storedHash:
+          type: string
+        calculatedHash:
+          type: string
+        hashValid:
+          type: boolean
+        previousHashValid:
+          type: boolean
+        type:
+          type: string
+
+    VerificationResult:
+      type: object
+      required: [isValid, totalBlocks, results]
+      properties:
+        isValid:
+          type: boolean
+        totalBlocks:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlockVerification"
+
+    ActivityEntry:
+      type: object
+      required: [index, type, ulpin, timestamp, hash, description]
+      properties:
+        index:
+          type: integer
+        type:
+          type: string
+          enum: [registration, transfer, genesis]
+        ulpin:
+          type: string
+        timestamp:
+          type: string
+        hash:
+          type: string
+        description:
+          type: string
+
+    DashboardStats:
+      type: object
+      required: [totalBlocks, totalRegistrations, totalTransfers, uniqueProperties, chainValid, recentActivity, registrationsByState, transfersOverTime]
+      properties:
+        totalBlocks:
+          type: integer
+        totalRegistrations:
+          type: integer
+        totalTransfers:
+          type: integer
+        uniqueProperties:
+          type: integer
+        chainValid:
+          type: boolean
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityEntry"
+        registrationsByState:
+          type: array
+          items:
+            $ref: "#/components/schemas/StateCount"
+        transfersOverTime:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesPoint"
+
+    StateCount:
+      type: object
+      required: [state, count]
+      properties:
+        state:
+          type: string
+        count:
+          type: integer
+
+    TimeSeriesPoint:
+      type: object
+      required: [date, registrations, transfers]
+      properties:
+        date:
+          type: string
+        registrations:
+          type: integer
+        transfers:
+          type: integer
+
+    SeedResult:
+      type: object
+      required: [success, blocksAdded, message]
+      properties:
+        success:
+          type: boolean
+        blocksAdded:
+          type: integer
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string

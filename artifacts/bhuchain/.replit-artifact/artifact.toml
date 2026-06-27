@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "BhuChain — Land Registry"
+version = "1.0.0"
+id = "artifacts/bhuchain"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22112
+
+[services.development]
+run = "pnpm --filter @workspace/bhuchain run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/bhuchain", "run", "build" ]
+publicDir = "artifacts/bhuchain/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22112"
+BASE_PATH = "/"
